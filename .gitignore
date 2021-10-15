@@ -1,0 +1,5 @@
+/data/datanode/current/
+/data/namenode/current/
+/data/datanode/in_use.lock
+/data/namenode/in_use.lock
+/.idea/
