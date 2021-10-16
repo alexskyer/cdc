@@ -59,7 +59,7 @@ VALUES (default,10001,'Beijing','Shanghai',false),
 ```
 ##### 3.Launch a Flink cluster, then start a Flink SQL CLI and execute following SQL statements inside
 ```shell script
-docker-compose exec  sql-client sql-client.sh
+docker exec cdc_sql-client_1 sql-client.sh
 ```
 ```sql
 SET execution.checkpointing.interval = 3s;
@@ -162,12 +162,12 @@ DELETE FROM orders WHERE order_id = 10004;
 ```
 ##### 5.Kafka Changelog JSON format
 ```shell script
-docker-compose exec  sql-client sql-client.sh
+docker exec cdc_sql-client_1 sql-client.sh
 ```
 ```sql
 CREATE TABLE kafka_gmv (
    day_str STRING,
-   gmv DECIMAL(10, 5)
+   gmv DECIMAL(10, 6)
  ) WITH (
      'connector' = 'kafka',
      'topic' = 'kafka_gmv',
@@ -205,58 +205,80 @@ UPDATE orders SET price = 40.00 WHERE order_id = 10005;
 
 DELETE FROM orders WHERE order_id = 10005;
 ```
+##### 6.hudi test
 ```sql
 --mysql
-CREATE  TABLE users (
- id BIGINT PRIMARY KEY,
- name varchar(20),
- birthday TIMESTAMP(3),
- ts TIMESTAMP(3)
-)
-
-
-CREATE  TABLE mysql_t1 (
- id BIGINT PRIMARY KEY NOT ENFORCED ,
- name STRING,
- birthday TIMESTAMP(3),
- ts TIMESTAMP(3)
-) WITH (
- 'connector' = 'mysql-cdc',
- 'hostname' = 'mysql',
- 'port' = '3306',
- 'username' = 'root',
- 'password' = '123456',
- 'server-time-zone' = 'Asia/Shanghai',
- 'database-name' = 'mydb',
- 'table-name' = 'users'   
+create table users
+(
+    id bigint auto_increment primary key,
+    name varchar(20) null,
+    birthday timestamp default CURRENT_TIMESTAMP not null,
+    ts timestamp default CURRENT_TIMESTAMP not null
 );
+ 
+// 随意插入几条数据
+insert into users (name) values ('hello');
+insert into users (name) values ('world');
+insert into users (name) values ('iceberg');
+insert into users (id,name) values (4,'spark');
+insert into users (name) values ('hudi');
+ 
+select * from users;
+update users set name = 'hello spark'  where id = 5;
+delete from users where id = 5;
 ```
 ```sql
---hudi table
-CREATE TABLE t1(
-  uuid VARCHAR(20),
-  name VARCHAR(10),
-  age INT,
-  ts TIMESTAMP(3),
-  `partition` VARCHAR(20)
-)
-PARTITIONED BY (`partition`)
-WITH (
-  'connector' = 'hudi',
-  'path' = 'hdfs://namenode:8020/hudi/t1',
-  'table.type' = 'MERGE_ON_READ'
+CREATE TABLE kafka_users (
+   name STRING,
+   birth TIMESTAMP(3)
+ ) WITH (
+     'connector' = 'kafka',
+     'topic' = 'kafka_users',
+     'scan.startup.mode' = 'earliest-offset',
+     'properties.bootstrap.servers' = 'kafka:9094',
+     'format' = 'changelog-json'
+ );
+
+INSERT INTO kafka_users
+SELECT name,birthday from mysql_users;
+```
+```sql
+--flink table
+CREATE TABLE mysql_users (
+                             id BIGINT PRIMARY KEY NOT ENFORCED ,
+                             name STRING,
+                             birthday TIMESTAMP(3),
+                             ts TIMESTAMP(3)
+) WITH (
+      'connector' = 'mysql-cdc',
+      'hostname' = 'mysql',
+      'port' = '3306',
+      'username' = 'root',
+      'password' = '123456',
+      'server-time-zone' = 'Asia/Shanghai',
+      'database-name' = 'mydb',
+      'table-name' = 'users'
+      );
+ 
+// 2.创建hudi表
+CREATE TABLE hudi_users2
+(
+    id BIGINT PRIMARY KEY NOT ENFORCED,
+    name STRING,
+    birthday TIMESTAMP(3),
+    ts TIMESTAMP(3),
+    `partition` VARCHAR(20)
+) PARTITIONED BY (`partition`) WITH (
+    'connector' = 'hudi',
+    'table.type' = 'MERGE_ON_READ',
+    'path' = 'hdfs://namenode:8020/hudi/hudi_users2',
+    'read.streaming.enabled' = 'true',
+    'read.streaming.check-interval' = '1' 
 );
 
-INSERT INTO t1 VALUES
-  ('id1','Danny',23,TIMESTAMP '1970-01-01 00:00:01','par1'),
-  ('id2','Stephen',33,TIMESTAMP '1970-01-01 00:00:02','par1'),
-  ('id3','Julian',53,TIMESTAMP '1970-01-01 00:00:03','par2'),
-  ('id4','Fabian',31,TIMESTAMP '1970-01-01 00:00:04','par2'),
-  ('id5','Sophia',18,TIMESTAMP '1970-01-01 00:00:05','par3'),
-  ('id6','Emma',20,TIMESTAMP '1970-01-01 00:00:06','par3'),
-  ('id7','Bob',44,TIMESTAMP '1970-01-01 00:00:07','par4'),
-  ('id8','Han',56,TIMESTAMP '1970-01-01 00:00:08','par4');
-  
+INSERT INTO hudi_users2 SELECT *, DATE_FORMAT(birthday, 'yyyyMMdd') FROM mysql_users;
+
+
  #查询表数据，设置一下查询模式为tableau
 set execution.result-mode=tableau;
 
