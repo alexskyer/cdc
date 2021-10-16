@@ -20,7 +20,7 @@ apt-get install -y vim --fix-missing;
 # Copy configuration
 COPY conf/* /opt/flink/conf/
 
-#COPY jars/* /opt/flink/lib/
+COPY jars/* /opt/flink/lib/
 
 COPY docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]

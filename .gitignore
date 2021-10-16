@@ -3,3 +3,4 @@
 /data/datanode/in_use.lock
 /data/namenode/in_use.lock
 /.idea/
+/data/yarn/leveldb-timeline-store.ldb/

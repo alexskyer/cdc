@@ -50,7 +50,7 @@ RUN wget -P /opt/sql-client/lib/ https://repo.maven.apache.org/maven2/org/apache
 # Copy configuration
 COPY conf/* /opt/flink/conf/
 
-#COPY jars/* /opt/sql-client/lib/
+COPY jars/* /opt/sql-client/lib/
 
 WORKDIR /opt/sql-client
 ENV SQL_CLIENT_HOME /opt/sql-client
