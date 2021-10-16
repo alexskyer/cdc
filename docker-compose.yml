@@ -159,6 +159,26 @@ services:
     image: alexskyer/flink-web1.13.2:v1
     ports:
       - 9084:9084
-      - 8081:8081
+      - 8081:9081
     container_name: flinkweb
+
+  hive-server:
+    image: alexskyer/hive2.3.2:v1
+    env_file:
+      - ./hadoop.env
+    environment:
+      SERVICE_PRECONDITION: "hive-metastore:9083"
+    volumes:
+      - ./data:/data
+    ports:
+      - "10000:10000"
+  hive-metastore:
+    image: alexskyer/hive2.3.2:v1
+    env_file:
+      - ./hadoop.env
+    command: /opt/hive/bin/hive --service metastore
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870 datanode:9864 mysql:3306"
+    ports:
+      - "9083:9083"
 
