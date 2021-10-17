@@ -164,6 +164,8 @@ services:
 
   hive-server:
     image: alexskyer/hive2.3.2:v1
+    depends_on:
+      - mysql
     env_file:
       - ./hadoop.env
     environment:
