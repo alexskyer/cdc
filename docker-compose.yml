@@ -76,8 +76,8 @@ services:
       KAFKA_BOOTSTRAP: kafka
       MYSQL_HOST: mysql
       ES_HOST: elasticsearch
-    volumes:
-      - ./data/flink:/opt/sql-client/data
+#    volumes:
+#      - ./data/flink:/opt/sql-client/data
 
   jobmanager:
     image: alexskyer/flink1.13.2:v1
@@ -88,8 +88,8 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-    volumes:
-      - ./data/flink:/opt/flink/data
+#    volumes:
+#      - ./data/flink:/opt/flink/data
 
   taskmanager:
     image: alexskyer/flink1.13.2:v1
@@ -101,8 +101,8 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 10
-    volumes:
-      - ./data/flink:/opt/flink/data
+#    volumes:
+#      - ./data/flink:/opt/flink/data
 
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
@@ -110,8 +110,8 @@ services:
       - 50070:50070
       - 9000:9000
     container_name: namenode
-    volumes:
-      - ./data/namenode:/hadoop/dfs/name
+#    volumes:
+#      - ./data/namenode:/hadoop/dfs/name
     environment:
       - CLUSTER_NAME=test
     env_file:
@@ -120,8 +120,8 @@ services:
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
     container_name: datanode
-    volumes:
-      - ./data/datanode:/hadoop/dfs/data
+#    volumes:
+#      - ./data/datanode:/hadoop/dfs/data
     environment:
       SERVICE_PRECONDITION: "namenode:50070"
     env_file:
@@ -150,17 +150,17 @@ services:
     container_name: historyserver
     environment:
       SERVICE_PRECONDITION: "namenode:50070 datanode:50075 resourcemanager:8088"
-    volumes:
-      - ./data/yarn:/hadoop/yarn/timeline
+#    volumes:
+#      - ./data/yarn:/hadoop/yarn/timeline
     env_file:
       - ./hadoop.env
 
-  flinkweb:
-    image: alexskyer/flink-web1.13.2:v1
-    ports:
-      - 9084:9084
-      - 8081:9081
-    container_name: flinkweb
+#  flinkweb:
+#    image: alexskyer/flink-web1.13.2:v1
+#    ports:
+#      - 9084:9084
+#      - 8081:9081
+#    container_name: flinkweb
 
   hive-server:
     image: alexskyer/hive2.3.2:v1
@@ -168,17 +168,9 @@ services:
       - ./hadoop.env
     environment:
       SERVICE_PRECONDITION: "hive-metastore:9083"
-    volumes:
-      - ./data:/data
+#    volumes:
+#      - ./data:/data
     ports:
       - "10000:10000"
-  hive-metastore:
-    image: alexskyer/hive2.3.2:v1
-    env_file:
-      - ./hadoop.env
-    command: /opt/hive/bin/hive --service metastore
-    environment:
-      SERVICE_PRECONDITION: "namenode:9870 datanode:9864 mysql:3306"
-    ports:
-      - "9083:9083"
+
 

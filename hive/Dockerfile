@@ -12,12 +12,15 @@ ENV HADOOP_HOME /opt/hadoop-$HADOOP_VERSION
 
 WORKDIR /opt
 
+RUN apt-get update; \
+apt-get install -y wget --fix-missing; \
+apt-get install -y unzip --fix-missing;
+
 RUN wget https://archive.apache.org/dist/hive/hive-$HIVE_VERSION/apache-hive-$HIVE_VERSION-bin.tar.gz && \
 	tar -xzvf apache-hive-$HIVE_VERSION-bin.tar.gz && \
 	mv apache-hive-$HIVE_VERSION-bin hive
 
-RUN wget https://jdbc.postgresql.org/download/postgresql-9.4.1212.jar -O $HIVE_HOME/lib/postgresql-jdbc.jar && \
-	rm apache-hive-$HIVE_VERSION-bin.tar.gz
+RUN rm apache-hive-$HIVE_VERSION-bin.tar.gz
 
 RUN wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.47.zip && \
  	unzip mysql-connector-java-5.1.47.zip && \
