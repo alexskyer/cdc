@@ -59,7 +59,7 @@ VALUES (default,10001,'Beijing','Shanghai',false),
 ```
 ##### 3.Launch a Flink cluster, then start a Flink SQL CLI and execute following SQL statements inside
 ```shell script
-docker exec cdc_sql-client_1 sql-client.sh
+docker exec -it cdc_sql-client_1 /bin/bash
 ```
 ```sql
 SET execution.checkpointing.interval = 3s;
@@ -159,6 +159,9 @@ UPDATE shipments SET is_arrived = true WHERE shipment_id = 1004;
 
 --MySQL
 DELETE FROM orders WHERE order_id = 10004;
+
+--PG
+DELETE FROM shipments WHERE shipment_id = 1004;
 ```
 ##### 5.Kafka Changelog JSON format
 ```shell script
@@ -175,6 +178,24 @@ CREATE TABLE kafka_gmv (
      'properties.bootstrap.servers' = 'kafka:9094',
      'format' = 'changelog-json'
  );
+
+CREATE TABLE kafka_shipments (
+   shipment_id INT,
+   order_id INT,
+   origin STRING,
+   destination STRING,
+   is_arrived BOOLEAN
+ ) WITH (
+    'connector' = 'kafka',
+    'topic' = 'kafka_shipments',
+    'scan.startup.mode' = 'earliest-offset',
+    'properties.bootstrap.servers' = 'kafka:9094',
+    'format' = 'changelog-json'
+ );
+INSERT INTO kafka_shipments
+ SELECT shipment_id,order_id,origin,destination,is_arrived
+ FROM shipments;
+
 
 INSERT INTO kafka_gmv
  SELECT DATE_FORMAT(order_date, 'yyyy-MM-dd') as day_str, SUM(price) as gmv
@@ -286,5 +307,5 @@ select * from t1;
 ```
 
 ```sql
-INSERT INTO Hudi_users5(id,name,birthday,ts, `partition`) SELECT id,name,birthday,ts,DATE_FORMAT(birthday, 'yyyyMMdd') FROM mySQL_users;
+INSERT INTO hudi_users2(id,name,birthday,ts, `partition`) SELECT id,name,birthday,ts,DATE_FORMAT(birthday, 'yyyyMMdd') FROM mysql_users;
 ```

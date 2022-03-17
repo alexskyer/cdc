@@ -127,33 +127,33 @@ services:
     env_file:
       - ./hadoop.env
 
-  resourcemanager:
-    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop2.7.4-java8
-    ports:
-      - 8088:8088
-    container_name: resourcemanager
-    environment:
-      SERVICE_PRECONDITION: "namenode:50070 datanode:50075"
-    env_file:
-      - ./hadoop.env
+#  resourcemanager:
+#    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop2.7.4-java8
+#    ports:
+#      - 8088:8088
+#    container_name: resourcemanager
+#    environment:
+#      SERVICE_PRECONDITION: "namenode:50070 datanode:50075"
+#    env_file:
+#      - ./hadoop.env
 
-  nodemanager1:
-    image: bde2020/hadoop-nodemanager:2.0.0-hadoop2.7.4-java8
-    container_name: nodemanager
-    environment:
-      SERVICE_PRECONDITION: "namenode:50070 datanode:50075 resourcemanager:8088"
-    env_file:
-      - ./hadoop.env
+#  nodemanager1:
+#    image: bde2020/hadoop-nodemanager:2.0.0-hadoop2.7.4-java8
+#    container_name: nodemanager
+#    environment:
+#      SERVICE_PRECONDITION: "namenode:50070 datanode:50075 resourcemanager:8088"
+#    env_file:
+#      - ./hadoop.env
 
-  historyserver:
-    image: bde2020/hadoop-historyserver:2.0.0-hadoop2.7.4-java8
-    container_name: historyserver
-    environment:
-      SERVICE_PRECONDITION: "namenode:50070 datanode:50075 resourcemanager:8088"
+#  historyserver:
+#    image: bde2020/hadoop-historyserver:2.0.0-hadoop2.7.4-java8
+#    container_name: historyserver
+#    environment:
+#      SERVICE_PRECONDITION: "namenode:50070 datanode:50075 resourcemanager:8088"
 #    volumes:
 #      - ./data/yarn:/hadoop/yarn/timeline
-    env_file:
-      - ./hadoop.env
+#    env_file:
+#      - ./hadoop.env
 
 #  flinkweb:
 #    image: alexskyer/flink-web1.13.2:v1
@@ -162,17 +162,17 @@ services:
 #      - 8081:9081
 #    container_name: flinkweb
 
-  hive-server:
-    image: alexskyer/hive2.3.2:v1
-    depends_on:
-      - mysql
-    env_file:
-      - ./hadoop.env
-    environment:
-      SERVICE_PRECONDITION: "hive-metastore:9083"
-#    volumes:
-#      - ./data:/data
-    ports:
-      - "10000:10000"
+#  hive-server:
+#    image: alexskyer/hive2.3.2:v1
+#    depends_on:
+#      - mysql
+#    env_file:
+#      - ./hadoop.env
+#    environment:
+#      SERVICE_PRECONDITION: "hive-metastore:9083"
+##    volumes:
+##      - ./data:/data
+#    ports:
+#      - "10000:10000"
 
 
